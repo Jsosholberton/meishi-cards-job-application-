@@ -11,6 +11,16 @@ export async function middleware(request: NextRequest) {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     await supabase.auth.getUser();
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.rewrite(new URL("/login", request.url));
+    }
+    if (session && request.nextUrl.pathname === "/login")
+      return NextResponse.redirect(new URL("/", request.url));
+
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!
@@ -34,5 +44,6 @@ export const config = {
      * Feel free to modify this pattern to include more paths.
      */
     "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/login",
   ],
 };
