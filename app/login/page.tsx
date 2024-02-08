@@ -12,7 +12,7 @@ export default function Login() {
     const msg = params.get('message');
 
     return (
-      <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
+      <p className={`${!msg && "hidden"} mt-4 p-4 bg-foreground/10 text-foreground text-center`}>
         {msg}
       </p>
     )
