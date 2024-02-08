@@ -4,8 +4,6 @@ import { cookies } from "next/headers";
 
 // Components
 import AuthButton from "../components/AuthButton";
-import UniversalCardComponent from "@/components/(CardComponents)/UniversalCardComponent";
-import ListVehicles from "@/components/(CardComponents)/ListVehicles";
 
 // Actions
 import { getVehicles } from "./lib/actions";
