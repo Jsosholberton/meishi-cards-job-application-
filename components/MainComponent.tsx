@@ -13,7 +13,7 @@ function MainComponent({ data }: { data: any }) {
       <section>
         <h2 className="font-bold text-4xl mb-4">Add a new vehicle!</h2>
         <div className="md:px-10">
-          <UniversalCardComponent type="create" func={setVehicles} allData={data} />
+          <UniversalCardComponent type="create" func={setVehicles} allData={vehicles} />
         </div>
       </section>
       <section>
