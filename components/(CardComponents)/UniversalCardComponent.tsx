@@ -10,9 +10,6 @@ import { createVehicle, deleteVehicle, updateVehicle } from "@/app/lib/actions";
 import { PencilIcon, TrashIcon, UploadIcon, CalendarIcon, ParticlesIcon, DotColorsIcon } from "./icons/Icons";
 import ButtonCard from "./ButtonCard";
 
-// Styles
-import { colors } from "@/utils/styles";
-
 // Types
 interface UniversalCardComponentProps {
   type?: string;
@@ -27,8 +24,8 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
   const { name = "", model = "", year = "", color = "" } = data || {};
   const [newData, setNewData] = useState({ name, model, year, color });
   const [types, setTypes] = useState(type);
+  const [loading, setLoading] = useState(false);
 
-  
   /**
    * Performs actions based on the provided types.
    * @param e - The form data.
@@ -37,11 +34,43 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
   const actions = async (e: FormData) => {
     switch (types) {
       case 'update':
-        return await updateVehicle(e, data?.id);
+        return await handleUpdateVehicle(e);
       case 'create':
-        return await createVehicle(e);
+        return await handleCreateVehicle(e);
     }
   }
+
+  const handleReset = () => {
+    setNewData({ name: "", model: "", year: "", color: "" });
+  }
+
+  const handleCreateVehicle = async (e: FormData) => {
+    const { data, msg } = await createVehicle(e);
+    if (data) {
+      func([...allData, data[0]]);
+      handleReset();
+    }
+  }
+
+  const handleUpdateVehicle = async (e: FormData) => {
+    const { data: vehicle, msg } = await updateVehicle(e, data?.id);
+    if (vehicle) {
+      setTypes(undefined);
+    }
+  }
+
+  const colors = {
+    red: "bg-red-600 text-white border-red-700",
+    blue: "bg-blue-500 text-white border-blue-600",
+    green: "bg-green-500 text-white border-green-600",
+    yellow: "bg-yellow-500 text-white border-yellow-600",
+    gray: "bg-gray-500 text-white border-gray-600",
+    indigo: "bg-indigo-500 text-white border-indigo-600",
+    pink: "bg-pink-500 text-white border-pink-600",
+    purple: "bg-purple-500 text-white border-purple-600",
+    black: "bg-black text-white border-white/30",
+    white: "bg-white text-black border-white",
+  };
 
   // Component for the buttons
   function Buttons() {
@@ -55,13 +84,19 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
               <PencilIcon className="h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300" />
             </button>
             <button
+              disabled={loading}
               type="button"
               onClick={async () => {
-                const { msg } = await deleteVehicle(data?.id)
-                if (msg) func(allData.filter((item: any) => item.id !== data?.id))
+                setLoading(true)
+                const { msg } = await deleteVehicle(data.id)
+                if (msg) {
+                  func(allData.filter((item: any) => item.id !== data.id))
+                  setLoading(false)
+                }
+                setLoading(false)
               }}
               className="rounded-r bg-black/80 backdrop-blur-sm text-red-600 shadow">
-              <TrashIcon className="h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300" />
+              <TrashIcon className={`${loading && "animate-spin"} h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300`} />
             </button>
           </div>) : (<div className="absolute top-0 left-0 p-4">
             <label className="text-white">
@@ -116,17 +151,27 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
                 className="w-full text-sm rounded-full border bg-black/50 border-white/30 text-center capitalize"
               />
             </label>
-            <label className="col-span-3 text-center relative">
+            <label htmlFor="color" className="col-span-3 text-center relative capitalize">
               <DotColorsIcon className="h-4 w-4 absolute left-0 -top-1 z-10" />
-              <input
+              <select
+                id="color"
                 name="color"
                 disabled={!types}
-                type="text"
-                placeholder="Vehicle color"
-                value={newData.color}
+                value={newData.color.toLowerCase()}
                 onChange={e => { setNewData({ ...newData, color: e.target.value }) }}
-                className={`${newData.color ? (colors as { [key: string]: string })[newData?.color.toLowerCase()] : "bg-black/50 border-white/30"} text-center w-full text-sm rounded-full border`}
-              />
+                className={`${newData.color ? (colors as { [key: string]: string })[newData?.color.toLowerCase()] : "bg-black/50 border-white/30"} text-center w-full text-sm rounded-full border capitalize disabled:opacity-100`}
+              >
+                <option>Choose a color</option>
+                {Object.keys(colors).map((color, index) => (
+                  <option
+                    key={index}
+                    value={color}
+                    className={`${colors[color as keyof typeof colors]} capitalize`}
+                  >
+                    {color}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
           {types && (<ButtonCard type={types} />)}
