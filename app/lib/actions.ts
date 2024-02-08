@@ -53,7 +53,7 @@ export async function createVehicle(form: FormData) {
     if (images && images.size > 0) {
       const { data, error } = await supabase.storage
         .from("images")
-        .upload(images.name, images);
+        .upload(images.name + Date.now(), images);
 
       if (error) {
         throw new Error(`Error uploading image: ${error.message}`);
@@ -62,7 +62,7 @@ export async function createVehicle(form: FormData) {
       rawFormData.images = path;
     }
 
-    if (images?.size == 0) {
+    if (images?.size === 0) {
       delete rawFormData.images;
     }
 

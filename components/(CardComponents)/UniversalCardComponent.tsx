@@ -21,8 +21,8 @@ interface UniversalCardComponentProps {
 function UniversalCardComponent({ type, data, func, allData }: UniversalCardComponentProps) {
 
   // States
-  const { name = "", model = "", year = "", color = "" } = data || {};
-  const [newData, setNewData] = useState({ name, model, year, color });
+  const { name = "", model = "", year = "", color = "", images = "" } = data || {};
+  const [newData, setNewData] = useState({ name, model, year, color, images });
   const [types, setTypes] = useState(type);
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +41,7 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
   }
 
   const handleReset = () => {
-    setNewData({ name: "", model: "", year: "", color: "" });
+    setNewData({ name: "", model: "", year: "", color: "", images: "" });
   }
 
   const handleCreateVehicle = async (e: FormData) => {
@@ -58,6 +58,21 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
       setTypes(undefined);
     }
   }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setNewData({ ...newData, images: reader.result }); // Asignar la URL de la imagen al estado
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    }
+  };
 
   const colors = {
     red: "bg-red-600 text-white border-red-700",
@@ -76,7 +91,7 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
   function Buttons() {
     return (
       <div className="absolute z-10 w-full">
-        {!types ? (
+        {!types && (
           <div className="absolute top-0 right-0 m-4 flex">
             <button type="button"
               onClick={() => { setTypes("update") }}
@@ -98,12 +113,8 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
               className="rounded-r bg-black/80 backdrop-blur-sm text-red-600 shadow">
               <TrashIcon className={`${loading && "animate-spin"} h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300`} />
             </button>
-          </div>) : (<div className="absolute top-0 left-0 p-4">
-            <label className="text-white">
-              <UploadIcon className="rounded bg-black shadow h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300 cursor-pointer" />
-              <input type="file" name="images" className="hidden" />
-            </label>
-          </div>)}
+          </div>)
+        }
       </div>
     )
   }
@@ -115,8 +126,22 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
         action={actions}
       >
         <Buttons />
+
+        {types && (
+          <div className="z-10 absolute top-0 left-0 p-4">
+            <label className="text-white">
+              <UploadIcon className="rounded bg-black shadow h-7 w-7 opacity-50 hover:opacity-100 transition-opacity duration-300 cursor-pointer" />
+              <input
+                type="file"
+                accept="image/*"
+                name="images" className="hidden"
+                onChange={handleImageChange} />
+            </label>
+          </div>
+        )
+        }
         <div className="h-full w-full relative">
-          <img src={data?.images || "/default.webp"} alt={data?.name || "image"} className="object-cover w-full h-full" />
+          <img src={newData.images || "/default.webp"} alt={data?.name || "image"} className="object-cover w-full h-full" />
           <div className="p-1 grid grid-cols-9 space-x-1 absolute inset-x-0 bottom-0 bg-black/30 backdrop-blur-sm border-t pt-1">
             <input
               name="name"
