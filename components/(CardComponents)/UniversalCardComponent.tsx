@@ -144,7 +144,7 @@ function UniversalCardComponent({ type, data, func, allData }: UniversalCardComp
               <input
                 name="year"
                 disabled={!types}
-                type="text"
+                type="number"
                 placeholder="Vehicle year"
                 value={newData.year}
                 onChange={e => { setNewData({ ...newData, year: e.target.value }) }}
